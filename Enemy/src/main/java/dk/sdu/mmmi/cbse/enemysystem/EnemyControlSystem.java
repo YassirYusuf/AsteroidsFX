@@ -15,12 +15,12 @@ import static java.util.stream.Collectors.toList;
 public class EnemyControlSystem implements IEntityProcessingService {
 
     private Random rand = new Random();
+    private static final double SPAWN_PROBABILITY = 0.001;
 
     @Override
     public void process(GameData gameData, World world) {
 
-        int spawnE = (int)(Math.random()*(5000)) - 1;
-        if(spawnE==56){
+        if (Math.random() < SPAWN_PROBABILITY) {
             world.addEntity(createEnemies(gameData));
         }
         for (Entity enemy : world.getEntities(Enemy.class)) {
@@ -42,17 +42,23 @@ public class EnemyControlSystem implements IEntityProcessingService {
 
             // Boundary conditions to keep the enemy on screen
             if (enemy.getX() < 0) enemy.setX(gameData.getDisplayWidth());
+
             if (enemy.getX() > gameData.getDisplayWidth()) enemy.setX(0);
+
             if (enemy.getY() < 0) enemy.setY(gameData.getDisplayHeight());
+
             if (enemy.getY() > gameData.getDisplayHeight()) enemy.setY(0);
+
+            if (enemy.isCollided()){
+                world.removeEntity(enemy);
+            }
         }
     }
 
     public Entity createEnemies(GameData gameData) {
         Entity Enemy = new Enemy();
-        int spawncoordsE = (int)(Math.random()*(5)) - 1;
-        Enemy.setX((double) gameData.getDisplayWidth()/spawncoordsE);
-        Enemy.setY((double )gameData.getDisplayWidth()/spawncoordsE);
+        int x = rand.nextInt(gameData.getDisplayWidth());
+        int y = rand.nextInt(gameData.getDisplayHeight());
         Enemy.setPolygonCoordinates(-5,-5,10,-2,10,2,-5,5);
         Enemy.setRadius(5);
         return Enemy;
