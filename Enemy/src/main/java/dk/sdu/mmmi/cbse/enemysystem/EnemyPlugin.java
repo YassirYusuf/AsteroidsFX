@@ -5,9 +5,12 @@ import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.World;
 import dk.sdu.mmmi.cbse.common.services.IGamePluginService;
 
+import java.util.Random;
+
 public class EnemyPlugin implements IGamePluginService {
 
     private Entity enemy;
+    Random rand = new Random();
 
     public EnemyPlugin() {
     }
@@ -21,7 +24,7 @@ public class EnemyPlugin implements IGamePluginService {
     }
     public Entity createEnemies(GameData gameData) {
         Entity Enemy = new Enemy();
-        int spawncoordsE = (int)(Math.random()*(5)) - 1;
+        int spawncoordsE = rand.nextInt(4) + 1;
         Enemy.setX((double) gameData.getDisplayWidth()/spawncoordsE);
         Enemy.setY((double )gameData.getDisplayWidth()/spawncoordsE);
         Enemy.setPolygonCoordinates(-5,-5,10,-2,10,2,-5,5);
