@@ -7,10 +7,6 @@ import dk.sdu.mmmi.cbse.common.data.World;
 
 import java.util.Random;
 
-/**
- *
- * @author corfixen
- */
 public class AsteroidSplitterImpl implements IAsteroidSplitter {
 
     @Override
@@ -18,7 +14,6 @@ public class AsteroidSplitterImpl implements IAsteroidSplitter {
         if (!(e instanceof Asteroid)) {
             return;
         }
-
         Asteroid original = (Asteroid) e;
         Random rnd = new Random();
 
@@ -29,20 +24,21 @@ public class AsteroidSplitterImpl implements IAsteroidSplitter {
         for (int i = 0; i < numSplits; i++) {
             Asteroid split = new Asteroid();
             int newSize = (int)(original.getRadius() * sizeReductionFactor);
-            split.setPolygonCoordinates(newSize, -newSize, -newSize, -newSize, -newSize, newSize, newSize, newSize);
-            split.setX(original.getX());
-            split.setY(original.getY());
             split.setRadius(newSize);
 
-            // Set new rotation slightly varied from the original
+            double offsetAngle = i == 0 ? angleVariation : -angleVariation;
             double newRotation = original.getRotation() + rnd.nextDouble() * angleVariation - angleVariation / 2;
             split.setRotation(newRotation);
+
+            // Calculating offset to avoid immediate collision
+            double offsetX = Math.cos(Math.toRadians(newRotation)) * original.getRadius();
+            double offsetY = Math.sin(Math.toRadians(newRotation)) * original.getRadius();
+            split.setX(original.getX() + offsetX);
+            split.setY(original.getY() + offsetY);
 
             world.addEntity(split);
         }
 
-
         world.removeEntity(original);
     }
-
 }
