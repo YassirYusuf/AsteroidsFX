@@ -18,7 +18,7 @@ public class AsteroidProcessor implements IEntityProcessingService {
         if (world.getEntities(Asteroid.class).size() < 5) {
             // Increased chance to add a new asteroid
             if (Math.random() < 0.10) {  // Changed for more frequent checks
-                Entity newAsteroid = asteroidPlugin.createAsteroid(gameData);
+                Entity newAsteroid = asteroidPlugin.createAsteroid(20, gameData.getDisplayWidth(), gameData.getDisplayHeight() * Math.random());
                 if (isPositionSafeForNewAsteroid(newAsteroid, world)) {
                     world.addEntity(newAsteroid);
                 }
@@ -38,12 +38,26 @@ public class AsteroidProcessor implements IEntityProcessingService {
                 asteroid.setRotation(360 - asteroid.getRotation());
             }
 
-//            if (asteroid.isCollided()) {
-//                asteroidSplitter.createSplitAsteroid(asteroid, world);
-//                world.removeEntity(asteroid); // Remove the original asteroid after handling
-//            }
             if (asteroid.isCollided()) {
                 world.removeEntity(asteroid);
+                if (asteroid.getRadius() > 10) {
+                    Entity asteroid1 = asteroidPlugin.createAsteroid((int) (asteroid.getRadius() - 5), asteroid.getX(), asteroid.getY() - 50);
+                    asteroid1.setRotation(asteroid.getRotation() + 35);
+
+                    Entity asteroid2 = asteroidPlugin.createAsteroid((int) (asteroid.getRadius() - 5), asteroid.getX(), asteroid.getY() + 50);
+                    asteroid2.setRotation(asteroid.getRotation() - 35);
+
+                    world.addEntity(asteroid1);
+                    world.addEntity(asteroid2);
+                }
+
+//            if (asteroid.isCollided()) {
+//                asteroidSplitter.createSplitAsteroid(asteroid, world);
+//                //world.removeEntity(asteroid); // Remove the original asteroid after handling
+//            }
+//            if (asteroid.isCollided()) {
+//                world.removeEntity(asteroid);
+//            }
             }
         }
     }
