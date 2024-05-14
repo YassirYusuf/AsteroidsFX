@@ -12,7 +12,7 @@ import java.util.ServiceLoader;
 
 import static java.util.stream.Collectors.toList;
 
-public class EnemyControlSystem implements IEntityProcessingService {
+public class ControlClass implements IEntityProcessingService {
 
     private Random rand = new Random();
     private static final double SPAWN_PROBABILITY = 0.001;
