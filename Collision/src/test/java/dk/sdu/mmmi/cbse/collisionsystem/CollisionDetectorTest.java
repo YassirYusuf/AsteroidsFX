@@ -2,14 +2,15 @@ package dk.sdu.mmmi.cbse.collisionsystem;
 
 
 import dk.sdu.mmmi.cbse.common.data.Entity;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 
 
 
-class CollisionDetectorTest {
+
+public class CollisionDetectorTest {
     private CollisionDetector collisiondetection;
 
     @BeforeEach
