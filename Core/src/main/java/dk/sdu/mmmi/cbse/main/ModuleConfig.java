@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 class ModuleConfig {
 
     @Bean
-    public Game game() {
-        return new Game(gamePluginServices(), entityProcessingServiceList(), postEntityProcessingServices());
+    public App app() {
+        return new App(gamePluginServices(), entityProcessingServiceList(), postEntityProcessingServices());
     }
 
     @Bean
