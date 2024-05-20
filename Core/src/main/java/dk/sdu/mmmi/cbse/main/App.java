@@ -1,6 +1,5 @@
 package dk.sdu.mmmi.cbse.main;
 
-import dk.sdu.mmmi.cbse.common.asteroids.Asteroid;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.GameKeys;
@@ -42,9 +41,11 @@ class App {
         this.postEntityProcessingServices = postEntityProcessingServices;
     }
 
-    public void start(Stage window) {
+
+    public void start(Stage window) throws Exception {
+        Text text = new Text(10, 20, "Destroyed asteroids: 0");
         gameWindow.setPrefSize(gameData.getDisplayWidth(), gameData.getDisplayHeight());
-        gameWindow.getChildren().add(scoreText);
+        gameWindow.getChildren().add(text);
 
         Scene scene = new Scene(gameWindow);
         scene.setOnKeyPressed(event -> {
@@ -92,7 +93,7 @@ class App {
         window.show();
     }
 
-    public void render() {
+    private void render() {
         new AnimationTimer() {
             @Override
             public void handle(long now) {
@@ -105,39 +106,13 @@ class App {
     }
 
     private void update() {
-        // Process all entities first
         for (IEntityProcessingService entityProcessorService : getEntityProcessingServices()) {
             entityProcessorService.process(gameData, world);
         }
         for (IPostEntityProcessingService postEntityProcessorService : getPostEntityProcessingServices()) {
             postEntityProcessorService.process(gameData, world);
         }
-
-
-        // Separate logic to handle scoring and entity removal
-        List<Entity> destroyedEntities = world.getEntities().stream()
-                .filter(Entity::isCollided)
-                .collect(toList());
-
-        for (Entity entity : destroyedEntities) {
-            if (entity instanceof Asteroid) {
-                try {
-                    // Add score for each destroyed asteroid
-                    totalScore = scoringClient.addScore(10L);
-                    scoreText.setText("Destroyed asteroids: " + totalScore / 10);
-                } catch (IOException | InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            world.removeEntity(entity);
-        }
     }
-
-
-//    private void updateScore(Long points) {
-//        Long newScore = scoreService.submitScore(points);
-//        System.out.println("New total score: " + newScore);
-//    }
 
     private void draw() {
         for (Entity polygonEntity : polygons.keySet()) {
