@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -30,149 +31,53 @@ import javafx.scene.layout.Pane;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+//import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 public class Main extends Application {
 
-    private final GameData gameData = new GameData();
-    private final World world = new World();
-    private final Map<Entity, Polygon> polygons = new ConcurrentHashMap<>();
-    private final Pane gameWindow = new Pane();
+//    private ScoreUpdateService scoreUpdateService;
+//    private ScoreService scoreService;
 
     public static void main(String[] args) {
-        Path pluginDirPath = Paths.get("plugins");
-//        Path pluginDirPath = (Path) Paths.get("plugins"); // Path to the directory containing plugin JARs
+//        Path pluginDirPath = Paths.get("plugins");
+////        Path pluginDirPath = (Path) Paths.get("plugins"); // Path to the directory containing plugin JARs
+//
+//        // Discover modules in the plugins directory
+//        ModuleFinder pluginFinder = ModuleFinder.of(pluginDirPath);
+//
+//        // Retrieve all module names from the found plugin modules
+//        List<String> pluginModuleNames = pluginFinder.findAll()
+//                .stream()
+//                .map(ModuleReference::descriptor)
+//                .map(ModuleDescriptor::name)
+//                .collect(Collectors.toList());
+//
+//        // Create a configuration to resolve plugin modules
+//        Configuration pluginConfig = ModuleLayer.boot()
+//                .configuration()
+//                .resolve(pluginFinder, ModuleFinder.of(), pluginModuleNames);
+//
+//        // Define a new module layer for the plugins
+//        ModuleLayer pluginLayer = ModuleLayer.boot()
+//                .defineModulesWithOneLoader(pluginConfig, ClassLoader.getSystemClassLoader());
+//
+//        // Use ServiceLoader to load services from the plugin layer
+//        ServiceLoader<IGamePluginService> serviceLoader = ServiceLoader.load(pluginLayer, IGamePluginService.class);
+//        // Plugin loading logic if needed
 
-        // Discover modules in the plugins directory
-        ModuleFinder pluginFinder = ModuleFinder.of(pluginDirPath);
-
-        // Retrieve all module names from the found plugin modules
-        List<String> pluginModuleNames = pluginFinder.findAll()
-                .stream()
-                .map(ModuleReference::descriptor)
-                .map(ModuleDescriptor::name)
-                .collect(Collectors.toList());
-
-        // Create a configuration to resolve plugin modules
-        Configuration pluginConfig = ModuleLayer.boot()
-                .configuration()
-                .resolve(pluginFinder, ModuleFinder.of(), pluginModuleNames);
-
-        // Define a new module layer for the plugins
-        ModuleLayer pluginLayer = ModuleLayer.boot()
-                .defineModulesWithOneLoader(pluginConfig, ClassLoader.getSystemClassLoader());
-
-        // Use ServiceLoader to load services from the plugin layer
-        ServiceLoader<IGamePluginService> serviceLoader = ServiceLoader.load(pluginLayer, IGamePluginService.class);
-        // Plugin loading logic if needed
-
-        launch(args);
+        launch(Main.class);
     }
 
     @Override
-    public void start(Stage window) throws Exception {
-        Text text = new Text(10, 20, "Destroyed asteroids: 0");
-        gameWindow.setPrefSize(gameData.getDisplayWidth(), gameData.getDisplayHeight());
-        gameWindow.getChildren().add(text);
+    public void start(Stage stage) {
+      AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ModuleConfig.class);
 
-        Scene scene = new Scene(gameWindow);
-        scene.setOnKeyPressed(event -> {
-            if (event.getCode().equals(KeyCode.LEFT)) {
-                gameData.getKeys().setKey(GameKeys.LEFT, true);
-            }
-            if (event.getCode().equals(KeyCode.RIGHT)) {
-                gameData.getKeys().setKey(GameKeys.RIGHT, true);
-            }
-            if (event.getCode().equals(KeyCode.UP)) {
-                gameData.getKeys().setKey(GameKeys.UP, true);
-            }
-            if (event.getCode().equals(KeyCode.SPACE)) {
-                gameData.getKeys().setKey(GameKeys.SPACE, true);
-            }
-        });
-        scene.setOnKeyReleased(event -> {
-            if (event.getCode().equals(KeyCode.LEFT)) {
-                gameData.getKeys().setKey(GameKeys.LEFT, false);
-            }
-            if (event.getCode().equals(KeyCode.RIGHT)) {
-                gameData.getKeys().setKey(GameKeys.RIGHT, false);
-            }
-            if (event.getCode().equals(KeyCode.UP)) {
-                gameData.getKeys().setKey(GameKeys.UP, false);
-            }
-            if (event.getCode().equals(KeyCode.SPACE)) {
-                gameData.getKeys().setKey(GameKeys.SPACE, false);
-            }
-
-        });
-
-        // Lookup all Game Plugins using ServiceLoader
-        for (IGamePluginService iGamePlugin : getPluginServices()) {
-            iGamePlugin.start(gameData, world);
+        for (String beanName : context.getBeanDefinitionNames()) {
+            System.out.println(beanName);
         }
-        for (Entity entity : world.getEntities()) {
-            Polygon polygon = new Polygon(entity.getPolygonCoordinates());
-            polygons.put(entity, polygon);
-            gameWindow.getChildren().add(polygon);
-        }
-        render();
-        window.setScene(scene);
-        window.setTitle("ASTEROIDS");
-        window.show();
-    }
-
-    private void render() {
-        new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                update();
-                draw();
-                gameData.getKeys().update();
-            }
-
-        }.start();
-    }
-
-    private void update() {
-        for (IEntityProcessingService entityProcessorService : getEntityProcessingServices()) {
-            entityProcessorService.process(gameData, world);
-        }
-        for (IPostEntityProcessingService postEntityProcessorService : getPostEntityProcessingServices()) {
-            postEntityProcessorService.process(gameData, world);
-        }       
-    }
-
-    private void draw() {        
-        for (Entity polygonEntity : polygons.keySet()) {
-            if(!world.getEntities().contains(polygonEntity)){   
-                Polygon removedPolygon = polygons.get(polygonEntity);               
-                polygons.remove(polygonEntity);                      
-                gameWindow.getChildren().remove(removedPolygon);
-            }
-        }
-                
-        for (Entity entity : world.getEntities()) {                      
-            Polygon polygon = polygons.get(entity);
-            if (polygon == null) {
-                polygon = new Polygon(entity.getPolygonCoordinates());
-                polygons.put(entity, polygon);
-                gameWindow.getChildren().add(polygon);
-            }
-            polygon.setTranslateX(entity.getX());
-            polygon.setTranslateY(entity.getY());
-            polygon.setRotate(entity.getRotation());
-        }
-
-    }
-
-    private Collection<? extends IGamePluginService> getPluginServices() {
-        return ServiceLoader.load(IGamePluginService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
-    }
-
-    private Collection<? extends IEntityProcessingService> getEntityProcessingServices() {
-        return ServiceLoader.load(IEntityProcessingService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
-    }
-
-    private Collection<? extends IPostEntityProcessingService> getPostEntityProcessingServices() {
-        return ServiceLoader.load(IPostEntityProcessingService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
+      App app = context.getBean(App.class);
+      app.start(stage);
+      app.render();
     }
 }
