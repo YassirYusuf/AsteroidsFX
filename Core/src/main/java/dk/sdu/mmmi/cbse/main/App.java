@@ -93,7 +93,7 @@ class App {
         window.show();
     }
 
-    private void render() {
+    void render() {
         new AnimationTimer() {
             @Override
             public void handle(long now) {
