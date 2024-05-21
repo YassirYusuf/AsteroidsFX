@@ -28,8 +28,10 @@ public class CollisionDetectorTest {
         entityB.setY(5);
         entityB.setRadius(2);
 
+        boolean result = collisiondetection.collides(entityA, entityB);
+        System.out.println("Collision result: " + result);
 
-       Assertions.assertTrue(collisiondetection.collides(entityA, entityB));
+        Assertions.assertTrue(result);
     }
 
     @Test
@@ -44,7 +46,10 @@ public class CollisionDetectorTest {
         entityB.setY(10);
         entityB.setRadius(2);
 
-        Assertions.assertFalse(collisiondetection.collides(entityA, entityB));
+        boolean result = collisiondetection.collides(entityA, entityB);
+        System.out.println("Collision result: " + result);
+
+        Assertions.assertFalse(result);
     }
 
 }
