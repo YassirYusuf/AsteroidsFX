@@ -39,31 +39,27 @@ public class Main extends Application {
     private final Pane gameWindow = new Pane();
 
     public static void main(String[] args) {
-        Path pluginDirPath = Paths.get("plugins");
-//        Path pluginDirPath = (Path) Paths.get("plugins"); // Path to the directory containing plugin JARs
+        Path pluginDirPath = Paths.get("plugins/mods-mvn");
 
-        // Discover modules in the plugins directory
         ModuleFinder pluginFinder = ModuleFinder.of(pluginDirPath);
 
-        // Retrieve all module names from the found plugin modules
         List<String> pluginModuleNames = pluginFinder.findAll()
                 .stream()
                 .map(ModuleReference::descriptor)
                 .map(ModuleDescriptor::name)
                 .collect(Collectors.toList());
 
-        // Create a configuration to resolve plugin modules
+
         Configuration pluginConfig = ModuleLayer.boot()
                 .configuration()
                 .resolve(pluginFinder, ModuleFinder.of(), pluginModuleNames);
 
-        // Define a new module layer for the plugins
+
         ModuleLayer pluginLayer = ModuleLayer.boot()
                 .defineModulesWithOneLoader(pluginConfig, ClassLoader.getSystemClassLoader());
 
-        // Use ServiceLoader to load services from the plugin layer
+
         ServiceLoader<IGamePluginService> serviceLoader = ServiceLoader.load(pluginLayer, IGamePluginService.class);
-        // Plugin loading logic if needed
 
         launch(args);
     }
